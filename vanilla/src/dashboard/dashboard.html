@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Employee Management System</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+
+    <!-- Main Navigation Bar (Top Header) -->
+    <header class="app-header">
+        <div class="brand">
+            <img src="../assets/images/logo.png" alt="EMS Logo" width="30" height="30">
+            <span>Simple EMS</span>
+        </div>
+        
+        <!-- Search bar & User Profile Info -->
+        <div class="header-actions">
+            <input type="search" placeholder="Search employees..." aria-label="Search employees">
+            <div class="user-profile">
+                <img src="../assets/images/default-avatar.png" alt="Admin Avatar" class="avatar">
+                <span>Alex Morgan (Admin)</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <nav aria-label="Main Navigation">
+                <ul>
+                    <li><a href="dashboard.html" class="active">Dashboard</a></li>
+                    <li><a href="employees.html">Employees</a></li>
+                    <li><a href="add-employee.html">Add Employee</a></li>
+                    <li><a href="#reports">Reports</a></li>
+                    <li><a href="#settings">Settings</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Dashboard View Area -->
+        <main class="main-content">
+            
+            <!-- Key Metrics Overview Section -->
+            <section class="stats-overview" aria-labelledby="stats-heading">
+                <h2 id="stats-heading" class="sr-only">Key Statistics</h2>
+                <div class="card">
+                    <h3>Total Employees</h3>
+                    <p class="stat-number">148</p>
+                </div>
+                <div class="card">
+                    <h3>Departments</h3>
+                    <p class="stat-number">8</p>
+                </div>
+                <div class="card">
+                    <h3>On Leave</h3>
+                    <p class="stat-number">5</p>
+                </div>
+            </section>
+
+            <!-- Recent Employee Activity Section -->
+            <section class="recent-activity" aria-labelledby="activity-heading">
+                <h2 id="activity-heading">Recent Hires</h2>
+                
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Employee ID</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Department</th>
+                            <th scope="col">Role</th>
+                            <th scope="col">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>#EMP-1024</td>
+                            <td>Sarah Chen</td>
+                            <td>Engineering</td>
+                            <td>Frontend Developer</td>
+                            <td><span class="badge active">Active</span></td>
+                        </tr>
+                        <tr>
+                            <td>#EMP-1025</td>
+                            <td>Marcus Vance</td>
+                            <td>Marketing</td>
+                            <td>SEO Specialist</td>
+                            <td><span class="badge active">Active</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Application Footer -->
+    <footer class="app-footer">
+        <p>&copy; 2026 Simple EMS. All rights reserved.</p>
+        <nav aria-label="Footer Navigation">
+            <a href="docs/README.md">Docs</a> | 
+            <a href="#support">Support</a>
+        </nav>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+</html>

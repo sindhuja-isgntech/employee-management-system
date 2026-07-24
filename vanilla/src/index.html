@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Employee Management System</title>
+    
+    <!-- 1. Base Reset & Structural Layout -->
+    <link rel="stylesheet" href="./style.css">
+     <!--2. Reusable UI Components (Buttons, Badges, Modals, Tables)-->
+    <link rel="stylesheet" href="./components/component.css">
+     <!--3. Dashboard View Styles -->
+    <link rel="stylesheet" href="./dashboard/dashboard.css">
+</head>
+<body>
+
+    <!-- Top App Banner Header -->
+    <header class="app-header">
+        <div class="brand">
+            <!--<img src="assets/images/logo.png" alt="EMS Logo" width="32" height="32" onerror="this.style.display='none'">-->
+            <h1>EMS Dashboard</h1>
+        </div>
+
+        <div class="header-actions">
+            <div class="user-menu">
+                <img src="assets/image.png" alt="Profile Picture" class="avatar" onerror="this.src='https://via.placeholder.com/36'">
+                <div class="user-info">
+                    <span class="user-name">Alex Morgan</span>
+                    <span class="user-role">System Admin</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace Layout (Sidebar + Core Area) -->
+    <div class="app-body">
+
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <nav aria-label="Main Navigation">
+                <ul>
+                    <li><a href="index.html" class="nav-item active" aria-current="page">Dashboard</a></li>
+                    <li><a href="#employees" class="nav-item">Employees</a></li>
+                    <li><a href="#departments" class="nav-item">Departments</a></li>
+                    <li><a href="#reports" class="nav-item">Reports</a></li>
+                    <li><a href="#settings" class="nav-item">Settings</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="main-content">
+
+            <!-- Page Title & Primary Action -->
+            <header class="page-header">
+                <div>
+                    <h2>Employee Directory</h2>
+                    <p>Manage, track, and update employee records in real time.</p>
+                </div>
+                <div class="quick-actions">
+                    <button type="button" class="btn btn-primary" id="add-employee-btn">+ Add New Employee</button>
+                </div>
+            </header>
+
+            <!-- Metrics Overview -->
+            <section class="metrics-grid" aria-labelledby="metrics-title">
+                <h3 id="metrics-title" class="sr-only">Key Statistics</h3>
+
+                <article class="metric-card">
+                    <h4>Total Workforce</h4>
+                    <p class="metric-value" id="stat-total">0</p>
+                    <span class="metric-trend positive">Live System Count</span>
+                </article>
+
+                <article class="metric-card">
+                    <h4>Active Staff</h4>
+                    <p class="metric-value" id="stat-active">0</p>
+                    <span class="metric-subtext">Currently working</span>
+                </article>
+
+                <article class="metric-card">
+                    <h4>Onboarding / Leave</h4>
+                    <p class="metric-value" id="stat-other">0</p>
+                    <span class="metric-subtext">Pending / Away</span>
+                </article>
+            </section>
+
+            <!-- Main Data Table & Search Bar -->
+            <section class="recent-section" aria-labelledby="recent-hires-title">
+                <div class="section-header">
+                    <h3 id="recent-hires-title">All Records</h3>
+                    
+                    <!-- Live Search Bar -->
+                    <form class="search-form" action="#" method="GET" role="search" onsubmit="event.preventDefault();">
+                        <input type="search" id="search-input" placeholder="Search by name, role, or dept..." aria-label="Search employees">
+                    </form>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Employee</th>
+                                <th scope="col">ID</th>
+                                <th scope="col">Department</th>
+                                <th scope="col">Role</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="employee-table-body">
+                            <!-- Dynamic Rows Injected by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Modal Form (Create / Edit Employee) -->
+    <div id="employee-modal" class="modal" aria-hidden="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">Add New Employee</h3>
+                <button type="button" class="close-btn" id="close-modal">&times;</button>
+            </div>
+            <form id="employee-form">
+                <input type="hidden" id="emp-id"> <!-- Hidden ID field for edit tracking -->
+                
+                <div class="form-group">
+                    <label for="emp-name">Full Name</label>
+                    <input type="text" id="emp-name" required placeholder="e.g. Sarah Chen">
+                </div>
+
+                <div class="form-group">
+                    <label for="emp-dept">Department</label>
+                    <select id="emp-dept" required>
+                        <option value="Engineering">Engineering</option>
+                        <option value="Marketing">Marketing</option>
+                        <option value="Human Resources">Human Resources</option>
+                        <option value="Sales">Sales</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="emp-role">Role / Position</label>
+                    <input type="text" id="emp-role" required placeholder="e.g. Frontend Developer">
+                </div>
+
+                <div class="form-group">
+                    <label for="emp-status">Status</label>
+                    <select id="emp-status">
+                        <option value="Active">Active</option>
+                        <option value="Onboarding">Onboarding</option>
+                        <option value="On Leave">On Leave</option>
+                    </select>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="cancel-btn">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Employee</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- App Footer -->
+    <footer class="app-footer">
+        <p>&copy; 2026 Employee Management System. All rights reserved.</p>
+        <nav aria-label="Footer Links">
+            <a href="docs/README.md">Docs</a> 
+            <a href="#support">Support</a>
+        </nav>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+</html>
