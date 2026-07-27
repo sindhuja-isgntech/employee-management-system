@@ -1,84 +1,79 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Employee, EmployeeStatus } from '../types/employee';
+import { Employee, EmployeeStatus } from '../types/employee'; // Import EmployeeStatus
 
-interface EmployeeFormProps {
+
+interface EmployeeModalProps {
   isOpen: boolean;
-  currentEmployee: Employee | null;
   onClose: () => void;
   onSave: (formData: Omit<Employee, 'id'> & { id?: string }) => void;
+  currentEmployee: Employee | null;
 }
 
-// 1. Define interface for controlled state shape
-interface EmployeeFormData {
-  name: string;
-  email: string;
-  dept: string;
-  role: string;
-  designation: string;
-  status: EmployeeStatus;
-  avatarUrl: string;
-}
-
-const INITIAL_FORM_STATE: EmployeeFormData = {
-  name: '',
-  email: '',
-  dept: 'Engineering',
-  role: '',
-  designation: '',
-  status: 'Active',
-  avatarUrl: 'https://via.placeholder.com/48',
-};
-
-export const EmployeeForm: React.FC<EmployeeFormProps> = ({
+export const EmployeeModal: React.FC<EmployeeModalProps> = ({
   isOpen,
-  currentEmployee,
   onClose,
   onSave,
+  currentEmployee,
 }) => {
+  // 1. Create a reference typed for HTML input elements
   const nameInputRef = useRef<HTMLInputElement>(null);
 
-  // 2. Controlled state holding all input values
-  const [formData, setFormData] = useState<EmployeeFormData>(INITIAL_FORM_STATE);
+  const [formData, setFormData] = useState({
+    name: '',
+    dept: 'Engineering',
+    role: '',
+    designation: '',
+    email: '',
+    status:'Active' as EmployeeStatus,
+    avatarUrl: 'https://via.placeholder.com/48',
+  });
 
-  // Synchronize controlled state when editing or opening
+  // Hydrate or reset form values when opening or switching modes
   useEffect(() => {
     if (currentEmployee) {
       setFormData({
-        name: currentEmployee.name || '',
-        email: currentEmployee.email || '',
-        dept: currentEmployee.dept || 'Engineering',
-        role: currentEmployee.role || '',
-        designation: currentEmployee.designation || '',
-        status: currentEmployee.status || 'Active',
+        name: currentEmployee.name,
+        dept: currentEmployee.dept,
+        role: currentEmployee.role,
+        designation: currentEmployee.designation,
+        email: currentEmployee.email,
+        status: currentEmployee.status,
         avatarUrl: currentEmployee.avatarUrl || 'https://via.placeholder.com/48',
       });
     } else {
-      setFormData(INITIAL_FORM_STATE);
+      setFormData({
+        name: '',
+        dept: 'Engineering',
+        role: '',
+        designation: '',
+        email: '',
+        status: 'Active',
+        avatarUrl: 'https://via.placeholder.com/48',
+      });
     }
   }, [currentEmployee, isOpen]);
 
-  // Auto-focus Name field via useRef when form opens
+  // 2. Automatically focus the name input when the modal becomes visible
   useEffect(() => {
     if (isOpen) {
-      const timer = setTimeout(() => nameInputRef.current?.focus(), 50);
-      return () => clearTimeout(timer);
+      // A small timeout ensures the modal is fully mounted in the DOM before focusing
+      const focusTimer = setTimeout(() => {
+        nameInputRef.current?.focus();
+      }, 50);
+
+      return () => clearTimeout(focusTimer);
     }
   }, [isOpen]);
 
   if (!isOpen) return null;
 
-  // 3. Centralized change handler for all controlled inputs
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: name === 'status' ? (value as EmployeeStatus) : value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // 4. Form submission handler
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSave({
@@ -90,39 +85,34 @@ export const EmployeeForm: React.FC<EmployeeFormProps> = ({
   return (
     <div className="modal-overlay" style={overlayStyle}>
       <div className="modal-container" style={modalStyle}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
           <h3 style={{ margin: 0 }}>
             {currentEmployee ? 'Edit Employee' : 'Add New Employee'}
           </h3>
-          <button
-            type="button"
-            onClick={onClose}
-            style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: '18px' }}
-          >
+          <button type="button" onClick={onClose} style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: '18px' }}>
             ✕
           </button>
         </div>
 
         <form onSubmit={handleSubmit}>
-          {/* Employee Name (Controlled & Ref Focused) */}
+          {/* Employee Name - Target for useRef */}
           <div style={{ marginBottom: '12px' }}>
             <label htmlFor="name" style={{ display: 'block', marginBottom: '4px', fontWeight: 600 }}>
               Employee Name *
             </label>
             <input
-              ref={nameInputRef}
+              ref={nameInputRef} // <-- ATTACHED REF HERE
               type="text"
               id="name"
               name="name"
-              value={formData.name} // Controlled value
-              onChange={handleChange} // Controlled updater
+              value={formData.name}
+              onChange={handleChange}
               placeholder="e.g. Sarah Chen"
               required
               style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
             />
           </div>
 
-          {/* Email */}
           <div style={{ marginBottom: '12px' }}>
             <label htmlFor="email" style={{ display: 'block', marginBottom: '4px', fontWeight: 600 }}>
               Email Address *
@@ -131,15 +121,14 @@ export const EmployeeForm: React.FC<EmployeeFormProps> = ({
               type="email"
               id="email"
               name="email"
-              value={formData.email} // Controlled value
-              onChange={handleChange} // Controlled updater
+              value={formData.email}
+              onChange={handleChange}
               placeholder="sarah.chen@company.com"
               required
               style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
             />
           </div>
 
-          {/* Department & Status Row */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
             <div>
               <label htmlFor="dept" style={{ display: 'block', marginBottom: '4px', fontWeight: 600 }}>
@@ -148,8 +137,8 @@ export const EmployeeForm: React.FC<EmployeeFormProps> = ({
               <select
                 id="dept"
                 name="dept"
-                value={formData.dept} // Controlled value
-                onChange={handleChange} // Controlled updater
+                value={formData.dept}
+                onChange={handleChange}
                 style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
               >
                 <option value="Engineering">Engineering</option>
@@ -165,8 +154,8 @@ export const EmployeeForm: React.FC<EmployeeFormProps> = ({
               <select
                 id="status"
                 name="status"
-                value={formData.status} // Controlled value
-                onChange={handleChange} // Controlled updater
+                value={formData.status}
+                onChange={handleChange}
                 style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
               >
                 <option value="Active">Active</option>
@@ -175,7 +164,6 @@ export const EmployeeForm: React.FC<EmployeeFormProps> = ({
             </div>
           </div>
 
-          {/* Role */}
           <div style={{ marginBottom: '12px' }}>
             <label htmlFor="role" style={{ display: 'block', marginBottom: '4px', fontWeight: 600 }}>
               Role *
@@ -184,15 +172,14 @@ export const EmployeeForm: React.FC<EmployeeFormProps> = ({
               type="text"
               id="role"
               name="role"
-              value={formData.role} // Controlled value
-              onChange={handleChange} // Controlled updater
+              value={formData.role}
+              onChange={handleChange}
               placeholder="e.g. Developer"
               required
               style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
             />
           </div>
 
-          {/* Designation */}
           <div style={{ marginBottom: '20px' }}>
             <label htmlFor="designation" style={{ display: 'block', marginBottom: '4px', fontWeight: 600 }}>
               Designation
@@ -201,20 +188,19 @@ export const EmployeeForm: React.FC<EmployeeFormProps> = ({
               type="text"
               id="designation"
               name="designation"
-              value={formData.designation} // Controlled value
-              onChange={handleChange} // Controlled updater
+              value={formData.designation}
+              onChange={handleChange}
               placeholder="e.g. Senior Frontend Developer"
               style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
             />
           </div>
 
-          {/* Form Action Buttons */}
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-            <button type="button" onClick={onClose} className="btn btn-secondary">
+            <button type="button" onClick={onClose} className="btn btn-secondary" style={{ padding: '8px 16px', borderRadius: '4px' }}>
               Cancel
             </button>
-            <button type="submit" className="btn btn-primary">
-              {currentEmployee ? 'Update Employee' : 'Save Employee'}
+            <button type="submit" className="btn btn-primary" style={{ padding: '8px 16px', borderRadius: '4px', backgroundColor: '#0066cc', color: '#fff', border: 'none' }}>
+              {currentEmployee ? 'Update Record' : 'Save Employee'}
             </button>
           </div>
         </form>
@@ -223,6 +209,7 @@ export const EmployeeForm: React.FC<EmployeeFormProps> = ({
   );
 };
 
+// Inline Layout Styles
 const overlayStyle: React.CSSProperties = {
   position: 'fixed',
   top: 0,
@@ -245,4 +232,4 @@ const modalStyle: React.CSSProperties = {
   boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
 };
 
-export default EmployeeForm;
+export default EmployeeModal;

@@ -11,3 +11,8 @@ export interface Employee {
   email:string;
   designation:string;
 }
+
+export interface ModalState {
+  isOpen: boolean;
+  selectedEmp: Employee | null;
+}

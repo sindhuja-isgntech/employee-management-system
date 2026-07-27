@@ -1,14 +1,14 @@
 // src/App.jsx
 import React from 'react';
-import EmployeeDashboard from './components/EmployeeDashboard';
+import EmployeeDashboard1 from './components/EmployeeDashboard1';
 import './App.css';
 import Dashboard from './components/Dashboard';
 
 function App() {
   return (
     <div className="app">
-    <Dashboard />
-
+    
+    <EmployeeDashboard1 />
     </div>
   );
 }

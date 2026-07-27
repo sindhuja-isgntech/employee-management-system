@@ -1,5 +1,5 @@
 // src/components/Dashboard.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import EmployeeCard from './EmployeeCard';
 import { Employee } from '../types/employee';
 import AddEmployeeForm from './AddEmployeeForm';
@@ -41,6 +41,47 @@ const INITIAL_EMPLOYEES: Employee[] = [
 
 export const Dashboard: React.FC = () => {
   const [employees, setEmployees] = useState<Employee[]>(INITIAL_EMPLOYEES);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  // 2. Use useEffect to load data on component mount
+  useEffect(() => {
+    let isMounted = true; // Cleanup flag to prevent memory leaks on unmount
+
+    const loadEmployeeData = async (): Promise<void> => {
+      setIsLoading(true);
+
+      try {
+        // Simulate an asynchronous API network call with a 1-second delay
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
+        if (isMounted) {
+          setEmployees(INITIAL_EMPLOYEES);
+        }
+      } catch (error) {
+        console.error('Failed to load employee records:', error);
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+    loadEmployeeData();
+
+    // Cleanup function
+    return () => {
+      isMounted = false;
+    };
+  }, []); // Empty dependency array ensures this effect runs ONLY ONCE when the app starts
+
+  // Handlers
+  const handleToggleStatus = (id: string): void => {
+    setEmployees((prev) =>
+      prev.map((emp) =>
+        emp.id === id
+          ? { ...emp, status: emp.status === 'Active' ? 'Inactive' : 'Active' }
+          : emp
+      )
+    );
+  };
 
   const handleEdit = (id: string) => {
     console.log(`Edit clicked for employee ID: ${id}`);
@@ -55,7 +96,7 @@ export const Dashboard: React.FC = () => {
     setEmployees((prev) => [newEmp, ...prev]);
   };
 
-  const handleToggleStatus = (id: string) => {
+  {/*const handleToggleStatus = (id: string) => {
     setEmployees((prevEmployees) =>
       prevEmployees.map((emp) => {
         if (emp.id === id) {
@@ -66,7 +107,7 @@ export const Dashboard: React.FC = () => {
         return emp;
       })
     );
-  };
+  };*/}
 
   const handleDeleteEmployee = (id: string) => {
     const confirmDelete = window.confirm(
@@ -96,13 +137,41 @@ export const Dashboard: React.FC = () => {
           </header>
       <header style={{ marginBottom: '20px' }}>
         
-        {/* 1. Add Employee Form */}
-      <AddEmployeeForm onAddEmployee={handleAddEmployee} />
+        {/* 1. Add Employee Form 
+      <AddEmployeeForm onAddEmployee={handleAddEmployee} />  */}
         <h2>Employee List</h2>
         <p style={{ color: '#666', margin: 0 }}>
           Total Active Records: {employees.length}
         </p>
       </header>
+
+      {/* 3. Conditional UI rendering based on loading state */}
+          {isLoading ? (
+            <div style={{ padding: '40px', textAlign: 'center', color: '#666' }}>
+              <p>Loading employee data...</p>
+            </div>
+          ) : employees.length === 0 ? (
+            <div style={{ padding: '40px', textAlign: 'center', color: '#666' }}>
+              <p>No employee records found.</p>
+            </div>
+          ) : (
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+                gap: '16px',
+              }}
+            >
+              {employees.map((emp) => (
+                <EmployeeCard
+                  key={emp.id}
+                  employee={emp}
+                  onToggleStatus={handleToggleStatus}
+                  onDelete={handleDeleteEmployee}
+                />
+              ))}
+            </div>
+            )}
 
       {/*{employees.length === 0 ? (
         <div style={{ padding: '40px', textAlign: 'center', background: '#f9f9f9', borderRadius: '8px' }}>
@@ -125,9 +194,9 @@ export const Dashboard: React.FC = () => {
             />
           ))}
         </div>
-      )}*/}
+      )}
 
-      {/* 1. Check for empty state */}
+       1. Check for empty state 
       {employees.length === 0 ? (
         <p>No employee records found.</p>
       ) : (
@@ -139,7 +208,7 @@ export const Dashboard: React.FC = () => {
             marginTop: '16px',
           }}
         >
-          {/* 2. Dynamically map employee state array */}
+           2. Dynamically map employee state array 
           {employees.map((emp) => (
             <EmployeeCard
               key={emp.id} // <-- CRITICAL: Unique & stable key assigned here
@@ -149,7 +218,7 @@ export const Dashboard: React.FC = () => {
             />
           ))}
         </div>
-      )}
+      )} */}
       </main>
 </div>
     </div>
