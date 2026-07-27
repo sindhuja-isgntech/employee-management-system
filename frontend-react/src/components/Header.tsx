@@ -14,7 +14,7 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <header className="app-header">
       <div className="brand">
-        <h1>EMS Dashboard</h1>
+        <h1>Employee Managment System</h1>
       </div>
 
       <div className="header-actions">

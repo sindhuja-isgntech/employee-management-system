@@ -7,6 +7,7 @@ import EmployeeModal from './EmployeeModal.tsx';
 import { Employee } from '../types/employee';
 import { EmployeeCard } from './EmployeeCard';
 import { FilterPanel } from './FilterPanel.tsx';
+import { Header } from './Header.tsx';
 
 // --- TYPES & INTERFACES ---
 export type EmployeeStatus = 'Active' | 'Inactive' | string;
@@ -179,7 +180,7 @@ export const EmployeeDashboard1: React.FC = () => {
   
   return (
     <div className="app-root">
-      <Navbar />
+      <Header />
 
       <div className="app-body">
         <Sidebar />
@@ -187,7 +188,7 @@ export const EmployeeDashboard1: React.FC = () => {
         <main className="main-content">
           <header className="page-header">
             <div>
-              <h2>Employee Management System</h2>
+              <h2>EMS Dashboard</h2>
               <p>Welcome back! Manage, track, and update employee records in real time.</p>
             </div>
             <div className="quick-actions">
