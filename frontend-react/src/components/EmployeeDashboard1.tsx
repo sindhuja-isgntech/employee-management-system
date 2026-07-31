@@ -249,21 +249,20 @@ export const EmployeeDashboard1: React.FC = () => {
                         <p>No employee records found.</p>
                       </div>
                     ) : (
-                      <div 
-                                 style={{
-                                                 display: 'grid',
-                                                 gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-                                                 gap: '16px',
-                                               }}
-                                             >
-                                               {filteredEmployees.map((emp) => (
-                                                 <EmployeeCard
-                                                   key={emp.id}
-                                                   employee={emp}
-                                                   onToggleStatus={handleToggleStatus}
-                                                   onDelete={handleDeleteEmployee}
-                                                 />
-                                               ))}
+                      <div style={{
+                                      display: 'grid',
+                                      gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+                                       gap: '16px',
+                                        }}
+                                        >
+                                      {filteredEmployees.map((emp) => (
+                                      <EmployeeCard
+                                         key={emp.id}
+                                          employee={emp}
+                                          onToggleStatus={handleToggleStatus}
+                                          onDelete={handleDeleteEmployee}
+                                           />
+                                          ))}
                       </div>
                       )}
 
