@@ -3,7 +3,7 @@ import React from 'react';
 export default function MetricsGrid({ total, active, other }) {
   return (
     <section className="metrics-grid" aria-labelledby="metrics-title">
-      <h3 id="metrics-title" className="sr-only">Key Statistics</h3>
+      
 
       <article className="metric-card">
         <h4>Total Workforce</h4>

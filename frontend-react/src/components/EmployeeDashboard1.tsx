@@ -1,6 +1,6 @@
 import React, { useState,useEffect } from 'react';
 import Navbar from './Navbar';
-import Sidebar from './Sidebar';
+
 import MetricsGrid from './MetricsGrid';
 import EmployeeModal from './EmployeeModal.tsx';
 
@@ -8,6 +8,8 @@ import { Employee } from '../types/employee';
 import { EmployeeCard } from './EmployeeCard';
 import { FilterPanel } from './FilterPanel.tsx';
 import { Header } from './Header.tsx';
+import { Sidebar } from './Sidebar.tsx';
+ // Import the CSS file for styling
 
 // --- TYPES & INTERFACES ---
 export type EmployeeStatus = 'Active' | 'Inactive' | string;
@@ -180,10 +182,10 @@ export const EmployeeDashboard1: React.FC = () => {
   
   return (
     <div className="app-root">
-      <Header />
+      {/*<Header />*/}
 
       <div className="app-body">
-        <Sidebar />
+        {/*<Sidebar />*/}
 
         <main className="main-content">
           <header className="page-header">
@@ -211,7 +213,7 @@ export const EmployeeDashboard1: React.FC = () => {
           {/* Table Container Section */}
           <section className="recent-section">
             <div className="section-header">
-              //<h3>All Records</h3>
+              {/*<h3>All Records</h3>*/}
               {/*<div className="search-form">
                 <input
                   type="search"
@@ -280,9 +282,7 @@ export const EmployeeDashboard1: React.FC = () => {
         currentEmployee={modalState.selectedEmp}
       />
 
-      <footer className="app-footer">
-        <p>&copy; 2026 Employee Management System. All rights reserved.</p>
-      </footer>
+      
     </div>
   );
 };

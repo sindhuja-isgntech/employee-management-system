@@ -1,6 +1,7 @@
 // src/components/EmployeeCard.tsx
 import React from 'react';
 import { Employee } from '../types/employee';
+import { Link } from 'react-router-dom';
 
 interface EmployeeCardProps {
   employee: Employee;
@@ -30,6 +31,23 @@ export const EmployeeCard: React.FC<EmployeeCardProps> = ({
         </div>
       </div>
 
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' , marginTop: '12px' }}>
+        <Link
+          to={`/employees/${employee.id}`}
+          style={{
+            padding: '6px 12px',
+            fontSize: '0.85rem',
+            backgroundColor: '#dee5eb',
+            color: '#171d25',
+            borderRadius: '8px',
+            textDecoration: 'none',
+            textAlign: 'center',
+          }}
+        >
+          View Profile
+        </Link>
+        </div>
+
       <div className="card-body" style={{ margin: '16px 0', fontSize: '0.9rem' }}>
         <p style={{ margin: '4px 0' }}><strong>Designation:</strong> {designation}</p>
         <p style={{ margin: '4px 0' }}><strong>Department:</strong> {dept}</p>
@@ -49,6 +67,7 @@ export const EmployeeCard: React.FC<EmployeeCardProps> = ({
         >
           {status}
         </span>
+        
 
         <div style={{ display: 'flex', gap: '8px' }}>
           {/* Status Toggle Button */}
@@ -84,6 +103,8 @@ export const EmployeeCard: React.FC<EmployeeCardProps> = ({
           >
             Delete
           </button>
+
+          
         </div>
       </div>
     </article>

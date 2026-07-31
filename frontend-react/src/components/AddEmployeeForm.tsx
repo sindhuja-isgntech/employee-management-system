@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Employee, EmployeeStatus } from '../types/employee';
+import { useNavigate } from 'react-router-dom';
 
 interface EmployeeFormProps {
   isOpen: boolean;
@@ -86,6 +87,9 @@ export const EmployeeForm: React.FC<EmployeeFormProps> = ({
       ...formData,
     });
   };
+
+  
+  
 
   return (
     <div className="modal-overlay" style={overlayStyle}>

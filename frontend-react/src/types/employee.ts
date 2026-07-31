@@ -16,3 +16,9 @@ export interface ModalState {
   isOpen: boolean;
   selectedEmp: Employee | null;
 }
+
+export interface FilterState {
+  searchTerm: string;
+  selectedDept: string;
+  selectedStatus: string;
+}
