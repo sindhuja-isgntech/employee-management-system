@@ -50,6 +50,7 @@ import EmployeeDashboard1 from './components/EmployeeDashboard1';
 import EmployeeDetailPage from './pages/EmployeeDetailPage';
 import NotFoundPage from './pages/NotFoundPage'
 import MainLayout1 from './components/MainLayout1'
+import DashboardSummary from './components/DashboardSummary';
 
 const AnalyticsPage = () => (
   <div style={{ padding: "24px" }}>

@@ -1,4 +1,4 @@
-import React from 'react';
+/*import React from 'react';
 
 export const Footer: React.FC = () => {
   return (
@@ -19,4 +19,16 @@ export const Footer: React.FC = () => {
       </p>
     </footer>
   );
+};*/
+
+import React from 'react';
+
+export const Footer = () => {
+  return (
+    <footer className="mt-auto border-t border-slate-200 bg-white py-4 text-center text-xs text-slate-500">
+      <p>© {new Date().getFullYear()} Employee Management System. All rights reserved.</p>
+    </footer>
+  );
 };
+
+export default Footer;

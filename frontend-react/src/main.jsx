@@ -16,6 +16,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import App from './App';
 import './index.css';
+import { EmployeeProvider } from './context/EmployeeContext';
 
 // Create a single QueryClient instance
 const queryClient = new QueryClient({
@@ -34,6 +35,7 @@ if (rootElement) {
     <React.StrictMode>
       {/* QueryClientProvider MUST wrap App */}
       <QueryClientProvider client={queryClient}>
+        <EmployeeProvider>
         <BrowserRouter
           future={{
             v7_startTransition: true,
@@ -42,6 +44,7 @@ if (rootElement) {
         >
           <App />
         </BrowserRouter>
+        </EmployeeProvider>
       </QueryClientProvider>
     </React.StrictMode>
   );

@@ -112,3 +112,4 @@ export const EmployeeCard: React.FC<EmployeeCardProps> = ({
 };
 
 export default EmployeeCard;
+

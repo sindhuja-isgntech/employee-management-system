@@ -1,5 +1,5 @@
 import React, { useState,useEffect } from 'react';
-import Navbar from './Navbar';
+import Navbar from '../components/Navbar.jsx';
 
 import MetricsGrid from './MetricsGrid';
 import EmployeeModal from './EmployeeModal.tsx';
@@ -8,7 +8,7 @@ import { Employee } from '../types/employee';
 import { EmployeeCard } from './EmployeeCard';
 import { FilterPanel } from './FilterPanel.tsx';
 import { Header } from './Header.tsx';
-import { Sidebar } from './Sidebar.tsx';
+import Sidebar  from './Sidebar.tsx';
  // Import the CSS file for styling
 
 // --- TYPES & INTERFACES ---
@@ -259,8 +259,6 @@ export const EmployeeDashboard1: React.FC = () => {
                                       <EmployeeCard
                                          key={emp.id}
                                           employee={emp}
-                                          onToggleStatus={handleToggleStatus}
-                                          onDelete={handleDeleteEmployee}
                                            />
                                           ))}
                       </div>

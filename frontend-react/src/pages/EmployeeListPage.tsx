@@ -127,7 +127,18 @@ export default EmployeeListPage; */
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
+import { useEmployeeContext } from '../context/EmployeeContext';
 
+import { Input } from '../../../src/components/ui/input';
+import { Button } from '../../../src/components/ui/button';
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '../../../src/components/ui/card';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../../../src/components/ui/select';
 // Type definitions matching JSONPlaceholder's /users API response
 interface ApiUser {
   id: number;

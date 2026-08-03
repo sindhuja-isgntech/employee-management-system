@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Employee, EmployeeStatus } from '../types/employee';
+import type { Employee, EmployeeStatus } from '../types/employee';
 import { useNavigate } from 'react-router-dom';
 
 interface EmployeeFormProps {
@@ -108,10 +108,10 @@ export const EmployeeForm: React.FC<EmployeeFormProps> = ({
         </div>
 
         <form onSubmit={handleSubmit}>
-          {/* Employee Name (Controlled & Ref Focused) */}
+          {/* Employee Name (Controlled & Ref Focused) *
           <div style={{ marginBottom: '12px' }}>
             <label htmlFor="name" style={{ display: 'block', marginBottom: '4px', fontWeight: 600 }}>
-              Employee Name *
+              Employee Name 
             </label>
             <input
               ref={nameInputRef}
@@ -250,3 +250,7 @@ const modalStyle: React.CSSProperties = {
 };
 
 export default EmployeeForm;
+
+
+
+
