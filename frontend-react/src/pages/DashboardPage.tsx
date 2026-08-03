@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
-import Navbar from '../components/Navbar';
-import Sidebar from '../components/Sidebar';
+//import Navbar from '../components/Navbar';
+//import Sidebar from '../components/Sidebar';
 import { DashboardHeader } from '../components/DashboardHeader';
-import MetricsGrid from '../components/MetricsGrid';
+//import MetricsGrid from '../components/MetricsGrid.jsx';
 import { FilterPanel } from '../components/FilterPanel';
 import { EmployeeList } from '../components/EmployeeList';
 import { EmployeeForm } from '../components/AddEmployeeForm';
 
 import { useEmployees } from '../hooks/useEmployees';
 import { useEmployeeFilter } from '../hooks/useEmployeeFilter';
-import { ModalState, Employee } from '../types/employee';
+import type { ModalState } from '../types/employee';
+import type { Employee } from '../types/employee';
 
 export const DashboardPage: React.FC = () => {
   const { employees, isLoading, toggleStatus, saveEmployee, deleteEmployee } = useEmployees();
@@ -36,10 +37,10 @@ export const DashboardPage: React.FC = () => {
 
   return (
     <div className="app-root">
-      <Navbar />
+      {/* <Navbar /> */}
 
       <div className="app-body">
-        <Sidebar />
+        {/* <Sidebar /> */}
 
         <main className="main-content">
           <DashboardHeader
@@ -48,11 +49,11 @@ export const DashboardPage: React.FC = () => {
             onAddNew={handleOpenAddModal}
           />
 
-          <MetricsGrid
+          {/* <MetricsGrid
             total={employees.length}
             active={employees.filter((e) => e.status.toLowerCase() === 'active').length}
             other={employees.filter((e) => e.status.toLowerCase() !== 'active').length}
-          />
+          /> */}
 
           <section className="recent-section">
             <FilterPanel
