@@ -1,4 +1,4 @@
-import React from 'react';
+/*import React from 'react';
 import type { Employee } from '../types/employee';
 
 interface EmployeeListProps {
@@ -103,6 +103,51 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
         </table>
       </div>
     </section>
+  );
+};
+
+export default EmployeeList;*/
+
+
+// Example usage inside React Context or Component
+import React, { useEffect, useState } from 'react';
+import { employeeService } from '../../../src/services/employeeService';
+import type { Employee } from '../../../src/services/employeeService';
+
+export const EmployeeList: React.FC = () => {
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      try {
+        const data = await employeeService.getAllEmployees();
+        setEmployees(data);
+      } catch (error) {
+        console.error('Failed to fetch employees:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchEmployees();
+  }, []);
+
+  const handleDelete = async (id: number) => {
+    try {
+      await employeeService.deleteEmployee(id);
+      setEmployees((prev) => prev.filter((emp) => emp.id !== id));
+    } catch (error) {
+      console.error('Failed to delete employee:', error);
+    }
+  };
+
+  if (isLoading) return <div>Loading records...</div>;
+
+  return (
+    <div>
+      {/* Map through employees */}
+    </div>
   );
 };
 

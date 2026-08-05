@@ -7,12 +7,14 @@ interface EmployeeCardProps {
   employee: Employee;
   onToggleStatus: (id: string) => void;
   onDelete: (id: string) => void; // Prop handler for removing an employee
+  onEdit: (id: string) => void; // Prop handler for editing an employee
 }
 
 export const EmployeeCard: React.FC<EmployeeCardProps> = ({
   employee,
   onToggleStatus,
   onDelete,
+  onEdit,
 }) => {
   const { name, id, dept, designation, email, status, avatarUrl } = employee;
   const isStatusActive = status === 'Active';
@@ -86,6 +88,22 @@ export const EmployeeCard: React.FC<EmployeeCardProps> = ({
             {isStatusActive ? 'Deactivate' : 'Activate'}
           </button>
 
+          {/* Edit Button */}
+          <button
+            type="button"
+            onClick={() => onEdit(id)}
+            style={{
+              padding: '6px 10px',
+              fontSize: '0.8rem',
+              borderRadius: '4px',
+              border: '1px solid #ccc',
+              background: '#fff',
+              cursor: 'pointer',
+            }}
+          >
+            Edit
+          </button>
+
           {/* Delete Button */}
           <button
             type="button"
@@ -103,8 +121,6 @@ export const EmployeeCard: React.FC<EmployeeCardProps> = ({
           >
             Delete
           </button>
-
-          
         </div>
       </div>
     </article>

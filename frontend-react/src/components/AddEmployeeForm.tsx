@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+/*import React, { useState, useEffect, useRef } from 'react';
 import type { Employee, EmployeeStatus } from '../types/employee';
 import { useNavigate } from 'react-router-dom';
 
@@ -126,7 +126,7 @@ export const EmployeeForm: React.FC<EmployeeFormProps> = ({
             />
           </div>
 
-          {/* Email */}
+          {/* Email 
           <div style={{ marginBottom: '12px' }}>
             <label htmlFor="email" style={{ display: 'block', marginBottom: '4px', fontWeight: 600 }}>
               Email Address *
@@ -143,7 +143,7 @@ export const EmployeeForm: React.FC<EmployeeFormProps> = ({
             />
           </div>
 
-          {/* Department & Status Row */}
+          {/* Department & Status Row 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
             <div>
               <label htmlFor="dept" style={{ display: 'block', marginBottom: '4px', fontWeight: 600 }}>
@@ -179,7 +179,7 @@ export const EmployeeForm: React.FC<EmployeeFormProps> = ({
             </div>
           </div>
 
-          {/* Role */}
+          {/* Role 
           <div style={{ marginBottom: '12px' }}>
             <label htmlFor="role" style={{ display: 'block', marginBottom: '4px', fontWeight: 600 }}>
               Role *
@@ -196,7 +196,7 @@ export const EmployeeForm: React.FC<EmployeeFormProps> = ({
             />
           </div>
 
-          {/* Designation */}
+          {/* Designation 
           <div style={{ marginBottom: '20px' }}>
             <label htmlFor="designation" style={{ display: 'block', marginBottom: '4px', fontWeight: 600 }}>
               Designation
@@ -212,7 +212,7 @@ export const EmployeeForm: React.FC<EmployeeFormProps> = ({
             />
           </div>
 
-          {/* Form Action Buttons */}
+          {/* Form Action Buttons 
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
             <button type="button" onClick={onClose} className="btn btn-secondary">
               Cancel
@@ -249,8 +249,189 @@ const modalStyle: React.CSSProperties = {
   boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
 };
 
-export default EmployeeForm;
+export default EmployeeForm;*/
 
 
+import React, { useState } from 'react';
+import { employeeApi } from '../../../src/api/employeeApi';
+import { Button } from '../../../src/components/ui/button';
+import { Input } from '../../../src/components/ui/input';
+import { Label } from '../../../src/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../src/components/ui/select';
+import { Loader2, CheckCircle2, AlertCircle, RefreshCw } from 'lucide-react';
 
+interface NewEmployeePayload {
+  name: string;
+  email: string;
+  department: string;
+  designation: string;
+  mobile: string;
+  status: 'Active' | 'Inactive';
+}
 
+const INITIAL_FORM_STATE: NewEmployeePayload = {
+  name: '',
+  email: '',
+  department: '',
+  designation: '',
+  mobile: '',
+  status: 'Active',
+};
+
+interface AddEmployeeFormProps {
+  onSuccess: (newEmployee: any) => void;
+}
+
+export const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({ onSuccess }) => {
+  const [formData, setFormData] = useState<NewEmployeePayload>(INITIAL_FORM_STATE);
+  const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [apiError, setApiError] = useState<string | null>(null);
+
+  // Auto-dismiss notification helper
+  const triggerSuccessNotification = (msg: string) => {
+    setSuccessMessage(msg);
+    setTimeout(() => {
+      setSuccessMessage(null);
+    }, 3000); // Clears alert after 3 seconds
+  };
+
+  const resetForm = () => {
+    setFormData(INITIAL_FORM_STATE);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setApiError(null);
+    setLoading(true);
+
+    try {
+      const createdEmployee = await employeeApi.createEmployee(formData);
+
+      // 1. Reset form input state back to default empty values
+      resetForm();
+
+      // 2. Trigger auto-dismissing success toast/alert notification
+      triggerSuccessNotification(`Employee "${formData.name}" was added successfully!`);
+
+      // 3. Notify parent component to update employee list UI
+      onSuccess(createdEmployee);
+    } catch (error: any) {
+      setApiError(error.response?.data?.message || 'Failed to save employee. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="relative space-y-4 rounded-xl border bg-white p-6 shadow-sm dark:bg-slate-900">
+      <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Add New Employee</h3>
+
+      {/* Success Notification Banner */}
+      {successMessage && (
+        <div className="flex items-center gap-2 rounded-lg bg-emerald-50 p-3 text-sm font-medium text-emerald-700 transition-all dark:bg-emerald-950/50 dark:text-emerald-400">
+          <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+          <span>{successMessage}</span>
+        </div>
+      )}
+
+      {/* API Error Notification */}
+      {apiError && (
+        <div className="flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm font-medium text-red-700 dark:bg-red-950/50 dark:text-red-400">
+          <AlertCircle className="h-4 w-4 shrink-0" />
+          <span>{apiError}</span>
+        </div>
+      )}
+
+      {/* Name Input */}
+      <div className="space-y-1">
+        <Label htmlFor="name">Employee Name *</Label>
+        <Input
+          id="name"
+          required
+          disabled={loading}
+          placeholder="e.g. Sarah Chen"
+          value={formData.name}
+          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+        />
+      </div>
+
+      {/* Email Input */}
+      <div className="space-y-1">
+        <Label htmlFor="email">Email Address *</Label>
+        <Input
+          id="email"
+          type="email"
+          required
+          disabled={loading}
+          placeholder="e.g. sarah.chen@company.com"
+          value={formData.email}
+          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {/* Designation Input */}
+        <div className="space-y-1">
+          <Label htmlFor="designation">Designation *</Label>
+          <Input
+            id="designation"
+            required
+            disabled={loading}
+            placeholder="e.g. Senior Developer"
+            value={formData.designation}
+            onChange={(e) => setFormData({ ...formData, designation: e.target.value })}
+          />
+        </div>
+
+        {/* Mobile Input */}
+        <div className="space-y-1">
+          <Label htmlFor="mobile">Mobile Number *</Label>
+          <Input
+            id="mobile"
+            type="tel"
+            required
+            disabled={loading}
+            placeholder="e.g. 9876543210"
+            value={formData.mobile}
+            onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
+          />
+        </div>
+      </div>
+
+      {/* Department Dropdown */}
+      <div className="space-y-1">
+        <Label>Department *</Label>
+         <select
+    id="department"
+    value={formData.department}
+    onChange={(e) =>
+      setFormData({
+        ...formData,
+        department: e.target.value,
+      })
+    }
+    className="h-10 w-full rounded-md border border-gray-300 px-3 py-2"
+  >
+    <option value="Engineering">Engineering</option>
+    <option value="Marketing">Marketing</option>
+    <option value="Human Resources">Human Resources</option>
+    <option value="Finance">Finance</option>
+  </select>
+      </div>
+
+      <Button type="submit" disabled={loading} className="w-full">
+        {loading ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Saving...
+          </>
+        ) : (
+          'Add Employee'
+        )}
+      </Button>
+    </form>
+  );
+};
+
+export default AddEmployeeForm;
