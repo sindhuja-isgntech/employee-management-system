@@ -1,5 +1,5 @@
 import * as React from "react";
-import { cn } from "../../../src/lib/utils";
+import { cn } from "@/lib/utils";
 
 function Input({
   className,
@@ -10,7 +10,7 @@ function Input({
     <input
       type={type}
       className={cn(
-        "h-8 w-full rounded-lg border border-gray-300 px-2.5 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500",
+        "h-10 w-full rounded-lg border border-(--border-color) bg-white px-3 py-2 text-sm text-(--text-main) transition-colors placeholder:text-(--text-light) focus:border-(--primary) focus:ring-3 focus:ring-emerald-600/15 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60",
         className
       )}
       {...props}

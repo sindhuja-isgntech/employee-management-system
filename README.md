@@ -1,4 +1,41 @@
-# React + TypeScript + Vite
+# EMS UI — Employee Management System (React + TypeScript + Vite)
+
+## Scripts
+
+- `npm run dev` — start the dev server
+- `npm run build` — type-check (`tsc -b`) and build for production
+- `npm run lint` — run ESLint
+
+## Project Structure
+
+```
+src/
+├── main.tsx              # App entry: providers (React Query, EmployeeContext, Router)
+├── App.tsx               # Route definitions
+├── index.css             # Tailwind + shadcn theme and global styles
+├── vite-env.d.ts         # Typed import.meta.env
+├── api/                  # Axios instance, endpoints, employee API client
+├── services/             # Alternate REST service layer
+├── assets/               # Static images bundled by Vite
+├── components/
+│   ├── ui/               # shadcn/ui primitives (button, card, input, select, ...)
+│   ├── layout/           # MainLayout, Header, Sidebar, Footer
+│   ├── dashboard/        # EmployeeDashboard, MetricsGrid, DashboardSummary, DashboardHeader
+│   └── employees/        # EmployeeCard, modals/forms, FilterPanel, SearchBar, EmployeeList
+├── context/              # EmployeeContext provider + hook
+├── hooks/                # useEmployees, useEmployeeFilter
+├── lib/                  # Shared helpers (cn)
+├── pages/                # Route-level pages
+├── types/                # Shared TypeScript types
+└── utils/                # Constants / seed data
+```
+
+Import from `src` using the `@/` alias (e.g. `import { Button } from '@/components/ui/button'`).
+Environment variables live in `.env` (e.g. `VITE_API_BASE_URL`).
+
+---
+
+## Vite template notes
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 

@@ -48,4 +48,12 @@ axiosInstance.interceptors.response.use(
   }
 );
 
+// Extract a server-provided error message, falling back to a default
+export const getApiErrorMessage = (error: unknown, fallback: string): string => {
+  if (axios.isAxiosError<{ message?: string }>(error)) {
+    return error.response?.data?.message || fallback;
+  }
+  return fallback;
+};
+
 export default axiosInstance;

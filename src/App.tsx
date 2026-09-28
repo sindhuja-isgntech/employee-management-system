@@ -1,40 +1,33 @@
-/*import  EmployeeDashboard1 from '../frontend-react/src/components/EmployeeDashboard1';
-
-import './App.css'
-
-function App() {
-
-return (
-    <div className="app">
-    {/*<Dashboard />
- <EmployeeDashboard1 />
-   
-    </div>
-  );
-}
-
-export default App*/
-
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
-import { MainLayout } from '../frontend-react/src/components/MainLayout';
-import { DashboardPage } from '../frontend-react/src/pages/DashboardPage';
-import { EmployeeListPage } from '../frontend-react/src/pages/EmployeeListPage';
-import { EmployeeDetailPage } from '../frontend-react/src/pages/EmployeeDetailPage';
-
-import { NotFoundPage } from '../frontend-react/src/pages/NotFoundPage';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { MainLayout } from './components/layout/MainLayout';
+import { DashboardPage } from './pages/DashboardPage';
+import { EmployeeListPage } from './pages/EmployeeListPage';
+import { EmployeeDetailPage } from './pages/EmployeeDetailPage';
+import { AnalyticsPage } from './pages/AnalyticsPage';
+import { NotFoundPage } from './pages/NotFoundPage';
 
 export const App: React.FC = () => {
   return (
     <Routes>
       <Route path="/" element={<MainLayout />}>
-        <Route index element={<DashboardPage />} />
-        {/* Cleaner routes without prop drilling */}
+        {/* Default route redirects to /dashboard */}
+        <Route index element={<Navigate to="/dashboard" replace />} />
+
+        {/* Main Dashboard Route */}
+        <Route path="dashboard" element={<DashboardPage />} />
+
         <Route path="employees" element={<EmployeeListPage />} />
-        
+
+        {/* Dynamic Route Parameter :id */}
         <Route path="employees/:id" element={<EmployeeDetailPage />} />
-        <Route path="*" element={<NotFoundPage />} />
+
+        {/* Additional Pages */}
+        <Route path="analytics" element={<AnalyticsPage />} />
       </Route>
+
+      {/* Catch-all 404 Route */}
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
 };
