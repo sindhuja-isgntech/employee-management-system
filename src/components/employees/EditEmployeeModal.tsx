@@ -77,7 +77,7 @@ export const EditEmployeeModal: React.FC<EditEmployeeModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm">
-      <div className="relative w-full max-w-lg rounded-2xl bg-white p-6 shadow-(--shadow-md) dark:bg-slate-900">
+      <div className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6 shadow-(--shadow-md) dark:bg-slate-900">
         {/* Header */}
         <div className="mb-4 flex items-center justify-between border-b pb-3 dark:border-slate-800">
           <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
@@ -93,7 +93,7 @@ export const EditEmployeeModal: React.FC<EditEmployeeModalProps> = ({
 
         {/* Notifications */}
         {successMessage && (
-          <div className="mb-4 flex items-center gap-2 rounded-lg bg-emerald-50 p-3 text-sm text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400">
+          <div className="mb-4 flex items-center gap-2 rounded-lg bg-blue-50 p-3 text-sm text-blue-700 dark:bg-blue-950/50 dark:text-blue-400">
             <CheckCircle2 className="h-4 w-4 shrink-0" />
             <span>{successMessage}</span>
           </div>

@@ -1,34 +1,58 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { MainLayout } from './components/layout/MainLayout';
-import { DashboardPage } from './pages/DashboardPage';
-import { EmployeeListPage } from './pages/EmployeeListPage';
-import { EmployeeDetailPage } from './pages/EmployeeDetailPage';
-import { AnalyticsPage } from './pages/AnalyticsPage';
-import { NotFoundPage } from './pages/NotFoundPage';
+import LoginPage from './pages/LoginPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
+import UnauthorizedPage from './pages/UnauthorizedPage';
+import ProtectedRoute from './components/ProtectedRoute';
+import AppLayout from './components/AppLayout';
+import AttendancePage from './pages/AttendancePage';
+import DepartmentsPage from './pages/DepartmentsPage';
+import LeavesPage from './pages/LeavesPage';
+import EmployeeDetailPage from './pages/EmployeeDetailPage';
+import { EmployeeList } from './components/employees/EmployeeList';
+import { EmployeeDashboard } from './components/dashboard/EmployeeDashboard';
+import { getStoredRoles, hasAnyRole } from './services/authService';
 
-export const App: React.FC = () => {
+const HomeRedirect: React.FC = () => {
+  const roles = getStoredRoles();
+  const home = hasAnyRole(roles, ['ADMIN', 'HR']) ? '/dashboard' : '/my-profile';
+  return <Navigate to={home} replace />;
+};
+
+const App: React.FC = () => {
+  // The single <BrowserRouter> lives in main.tsx; a second one here crashes the app
   return (
     <Routes>
-      <Route path="/" element={<MainLayout />}>
-        {/* Default route redirects to /dashboard */}
-        <Route index element={<Navigate to="/dashboard" replace />} />
+        {/* Public Routes */}
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
-        {/* Main Dashboard Route */}
-        <Route path="dashboard" element={<DashboardPage />} />
+        {/* Authenticated Application Layout */}
+        <Route element={<AppLayout />}>
+          {/* Routes open to all authenticated users */}
+          <Route element={<ProtectedRoute allowedRoles={['ADMIN', 'HR', 'EMPLOYEE']} />}>
+            <Route index element={<HomeRedirect />} />
+            
+            <Route path="/departments" element={<DepartmentsPage />} />
+            <Route path="/attendance" element={<AttendancePage />} />
+            <Route path="/leaves" element={<LeavesPage />} />
+            <Route element={<ProtectedRoute allowedRoles={['EMPLOYEE']} />}>
+              <Route path="/my-profile" element={<EmployeeDetailPage isMyProfile />} />
+            </Route>
+          </Route>
 
-        <Route path="employees" element={<EmployeeListPage />} />
+          {/* HR & ADMIN Only Routes */}
+          <Route element={<ProtectedRoute allowedRoles={['ADMIN', 'HR']} />}>
+          <Route path="/dashboard" element={<EmployeeDashboard />} />
+            <Route path="/employees" element={<EmployeeList />} />
+          <Route path="/employees/:id" element={<EmployeeDetailPage />} />
+          </Route>
+        </Route>
 
-        {/* Dynamic Route Parameter :id */}
-        <Route path="employees/:id" element={<EmployeeDetailPage />} />
-
-        {/* Additional Pages */}
-        <Route path="analytics" element={<AnalyticsPage />} />
-      </Route>
-
-      {/* Catch-all 404 Route */}
-      <Route path="*" element={<NotFoundPage />} />
-    </Routes>
+        {/* Fallback Redirect */}
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
   );
 };
 

@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import App from './App';
 import { EmployeeProvider } from './context/EmployeeContext';
+import { ToastProvider } from './components/common/toast/ToastProvider';
 import './index.css';
 
 // Create a single QueryClient instance
@@ -25,7 +26,9 @@ if (rootElement) {
       <QueryClientProvider client={queryClient}>
         <EmployeeProvider>
           <BrowserRouter>
-            <App />
+            <ToastProvider>
+              <App />
+            </ToastProvider>
           </BrowserRouter>
         </EmployeeProvider>
       </QueryClientProvider>

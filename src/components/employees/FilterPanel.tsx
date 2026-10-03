@@ -13,7 +13,7 @@ interface FilterPanelProps {
 }
 
 const selectClass =
-  'h-10 min-w-0 flex-1 cursor-pointer rounded-lg sm:flex-none border border-(--border-color) bg-(--bg-subtle) px-3 text-sm text-(--text-main) transition-colors hover:bg-white focus:border-(--primary) focus:bg-white focus:ring-3 focus:ring-emerald-600/15 focus:outline-none';
+  'h-10 min-w-0 flex-1 cursor-pointer rounded-lg sm:flex-none border border-(--border-color) bg-(--bg-subtle) px-3 text-sm text-(--text-main) transition-colors hover:bg-white focus:border-(--primary) focus:bg-white focus:ring-3 focus:ring-blue-600/15 focus:outline-none';
 
 export const FilterPanel: React.FC<FilterPanelProps> = ({
   searchTerm,

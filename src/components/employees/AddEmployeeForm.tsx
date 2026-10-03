@@ -329,8 +329,8 @@ export const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({ onSuccess }) =
 
       {/* Success Notification Banner */}
       {successMessage && (
-        <div className="flex items-center gap-2 rounded-lg bg-emerald-50 p-3 text-sm font-medium text-emerald-700 transition-all dark:bg-emerald-950/50 dark:text-emerald-400">
-          <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+        <div className="flex items-center gap-2 rounded-lg bg-blue-50 p-3 text-sm font-medium text-blue-700 transition-all dark:bg-blue-950/50 dark:text-blue-400">
+          <CheckCircle2 className="h-4 w-4 shrink-0 text-blue-600 dark:text-blue-400" />
           <span>{successMessage}</span>
         </div>
       )}

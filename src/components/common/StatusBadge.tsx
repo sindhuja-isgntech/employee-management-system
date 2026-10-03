@@ -2,13 +2,13 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 
 const STATUS_STYLES: Record<string, string> = {
-  active: 'bg-emerald-50 text-emerald-700 ring-emerald-600/20',
+  active: 'bg-blue-50 text-blue-700 ring-blue-600/20',
   inactive: 'bg-rose-50 text-rose-700 ring-rose-600/20',
   onboarding: 'bg-amber-50 text-amber-700 ring-amber-600/20',
 };
 
 const DOT_STYLES: Record<string, string> = {
-  active: 'bg-emerald-500',
+  active: 'bg-blue-500',
   inactive: 'bg-rose-500',
   onboarding: 'bg-amber-500',
 };

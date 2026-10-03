@@ -92,7 +92,7 @@ export const EmployeeModal: React.FC<EmployeeModalProps> = ({
       aria-modal="true"
       aria-labelledby="employee-modal-title"
     >
-      <div className="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-(--shadow-md)">
+      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white shadow-(--shadow-md)">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-(--border-color) px-6 py-4">
           <div className="flex items-center gap-3">
@@ -201,6 +201,6 @@ export const EmployeeModal: React.FC<EmployeeModalProps> = ({
 };
 
 const selectClass =
-  'h-10 w-full cursor-pointer rounded-lg border border-(--border-color) bg-white px-3 text-sm text-(--text-main) focus:border-(--primary) focus:ring-3 focus:ring-emerald-600/15 focus:outline-none';
+  'h-10 w-full cursor-pointer rounded-lg border border-(--border-color) bg-white px-3 text-sm text-(--text-main) focus:border-(--primary) focus:ring-3 focus:ring-blue-600/15 focus:outline-none';
 
 export default EmployeeModal;

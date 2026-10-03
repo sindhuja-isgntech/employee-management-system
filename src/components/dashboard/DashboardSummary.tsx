@@ -29,7 +29,7 @@ export const DashboardSummary: React.FC<SummaryData> = ({
       subtitle: 'Currently Working',
       badge: '98% operational rate',
       icon: UserCheck,
-      iconBg: 'bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400',
+      iconBg: 'bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400',
     },
     {
       title: 'Onboarding / Leave',
@@ -64,8 +64,8 @@ export const DashboardSummary: React.FC<SummaryData> = ({
               </div>
 
               <div className="mt-4 flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
-                <TrendingUp className="h-3.5 w-3.5 text-emerald-500" />
-                <span className="font-medium text-emerald-600 dark:text-emerald-400">{stat.subtitle}</span>
+                <TrendingUp className="h-3.5 w-3.5 text-blue-500" />
+                <span className="font-medium text-blue-600 dark:text-blue-400">{stat.subtitle}</span>
                 <span>• {stat.badge}</span>
               </div>
             </CardContent>

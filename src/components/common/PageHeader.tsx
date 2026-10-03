@@ -14,7 +14,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, actions
         <h2>{title}</h2>
         {subtitle && <p>{subtitle}</p>}
       </div>
-      {actions && <div className="flex items-center gap-2">{actions}</div>}
+      {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
     </header>
   );
 };

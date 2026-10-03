@@ -290,7 +290,8 @@ export default EmployeeDashboard;
 
 
 // src/pages/DashboardPage.tsx
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { employeeApi, ApiEmployee} from '@/api/employeeApi';
 import { EmployeeCard } from '../components/EmployeeCard';
 import { EditEmployeeModal } from '../components/EditEmployeeModal';
@@ -384,118 +385,33 @@ export const DashboardPage: React.FC = () => {
 
 export default DashboardPage;*/
 
-import React, { useEffect, useState } from 'react';
-import { employeeApi, type ApiEmployee } from '@/api/employeeApi';
+import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { employeeApi } from '@/api/employeeApi';
 import type { Employee } from '@/types/employee';
 
-import { Plus, Loader2, AlertCircle, RefreshCw, SearchX } from 'lucide-react';
+import { AlertCircle, RefreshCw, SearchX } from 'lucide-react';
 import { PageHeader } from '@/components/common/PageHeader';
 import MetricsGrid from './MetricsGrid';
 import { EmployeeCard } from '@/components/employees/EmployeeCard';
 import { FilterPanel } from '@/components/employees/FilterPanel';
-import { EditEmployeeModal } from '@/components/employees/EditEmployeeModal';
-import EmployeeModal from '@/components/employees/EmployeeModal';
-
-export interface ModalState {
-  isOpen: boolean;
-  selectedEmp: Employee | null;
-}
-
-// Records added locally keep the form's `dept`/`role` fields alongside the API shape
-type DashboardEmployee = ApiEmployee & Partial<Pick<Employee, 'dept' | 'role'>>;
 
 export const EmployeeDashboard: React.FC = () => {
   // --- STATE HOOKS ---
-  const [employees, setEmployees] = useState<DashboardEmployee[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    data: employees = [],
+    isLoading: loading,
+    error,
+    refetch: fetchEmployees,
+  } = useQuery({
+    queryKey: ['employees'],
+    queryFn: employeeApi.getEmployees,
+  });
 
   // Filter & Search States
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedDept, setSelectedDept] = useState<string>('All');
   const [selectedStatus, setSelectedStatus] = useState<string>('All');
-
-  // Add/Edit Modal States
-  const [addModalOpen, setAddModalOpen] = useState<boolean>(false);
-  const [selectedEmployeeForEdit, setSelectedEmployeeForEdit] = useState<ApiEmployee | null>(null);
-  const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
-
-  // --- FETCH EMPLOYEES FROM API ---
-  const fetchEmployees = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await employeeApi.getEmployees();
-      setEmployees(Array.isArray(data) ? data : []);
-    } catch (err) {
-      console.error('Failed to fetch employee records:', err);
-      setError('Unable to load employee records from backend.');
-      setEmployees([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchEmployees();
-  }, []);
-
-  // --- HANDLERS ---
-  const handleOpenAddModal = (): void => {
-    setAddModalOpen(true);
-  };
-
-  const handleOpenEditModal = (emp: ApiEmployee): void => {
-    setSelectedEmployeeForEdit(emp);
-    setIsEditModalOpen(true);
-  };
-
-  const handleEditCard = (id: string): void => {
-    const emp = employees.find((item) => item.id === id);
-    if (emp) {
-      handleOpenEditModal(emp);
-    }
-  };
-
-  const handleToggleStatus = (id: string): void => {
-    setEmployees((prevList) =>
-      prevList.map((emp) =>
-        emp.id === id
-          ? { ...emp, status: emp.status === 'Active' ? 'Inactive' : 'Active' }
-          : emp
-      )
-    );
-  };
-
-  const handleDeleteEmployee = (id: string): void => {
-    if (window.confirm('Are you sure you want to delete this employee?')) {
-      setEmployees((prevList) => prevList.filter((emp) => emp.id !== id));
-    }
-  };
-
-  // Called after successful PUT from Edit modal
-  const handleEmployeeUpdated = (updatedEmp: ApiEmployee): void => {
-    setEmployees((prevList) =>
-      prevList.map((emp) => (emp.id === updatedEmp.id ? updatedEmp : emp))
-    );
-    setIsEditModalOpen(false);
-  };
-
-  // Called after successful POST from Add modal
-  const handleEmployeeAdded = (formData: Omit<Employee, 'id'> & { id?: string }): void => {
-    const newApiEmployee: DashboardEmployee = {
-      ...formData,
-      id: formData.id ?? String(Date.now()),
-      department: formData.dept || 'General',
-      designation: formData.designation || formData.role || 'Employee',
-      status: formData.status || 'Active',
-      name: formData.name,
-      email: formData.email,
-    };
-
-    setEmployees((prevList) => [...prevList, newApiEmployee]);
-    setAddModalOpen(false);
-  };
 
   // --- SEARCH AND FILTER LOGIC ---
   const filteredEmployees = employees.filter((emp) => {
@@ -508,7 +424,7 @@ export const EmployeeDashboard: React.FC = () => {
       String(emp.id).toLowerCase().includes(normalizedSearch);
 
     // Department match (fallback to 'General' if department field is omitted)
-    const empDept = emp.dept || emp.department || 'General';
+    const empDept = emp.department || 'General';
     const matchesDept = selectedDept === 'All' || empDept === selectedDept;
 
     // Status match
@@ -522,7 +438,7 @@ export const EmployeeDashboard: React.FC = () => {
   // Extract unique departments dynamically for the filter dropdown
   const uniqueDepartments = Array.from(
     new Set(
-      employees.map((emp) => emp.dept || emp.department || 'General')
+      employees.map((emp) => emp.department || 'General')
     )
   );
 
@@ -533,12 +449,6 @@ export const EmployeeDashboard: React.FC = () => {
         <PageHeader
           title="Dashboard"
           subtitle="Welcome back! Manage, track, and update employee records in real time."
-          actions={
-            <button type="button" className="btn btn-primary" onClick={handleOpenAddModal}>
-              <Plus className="h-4 w-4" />
-              Add New Employee
-            </button>
-          }
         />
 
         {/* Dynamic Metrics Cards */}
@@ -549,7 +459,7 @@ export const EmployeeDashboard: React.FC = () => {
         />
 
         {/* Search & Filter Controls */}
-        <section className="rounded-xl border border-(--border-color) bg-white p-4 shadow-(--shadow-sm) sm:p-5">
+        <section className="card p-4 sm:p-5">
           <FilterPanel
             searchTerm={searchTerm}
             onSearchChange={setSearchTerm}
@@ -564,15 +474,30 @@ export const EmployeeDashboard: React.FC = () => {
         {/* Dynamic Records Grid */}
         <section className="space-y-4">
           {loading ? (
-            <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-(--border-color) bg-white p-12 text-(--text-muted)">
-              <Loader2 className="h-6 w-6 animate-spin text-(--primary)" />
-              <p className="text-sm">Loading employee data...</p>
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3" role="status" aria-label="Loading employee data">
+              {Array.from({ length: 6 }, (_, index) => (
+                <div key={index} className="card p-5">
+                  <div className="flex items-center gap-3">
+                    <div className="skeleton h-11 w-11 rounded-full" />
+                    <div className="flex-1 space-y-2">
+                      <div className="skeleton h-3.5 w-2/3" />
+                      <div className="skeleton h-3 w-1/3" />
+                    </div>
+                  </div>
+                  <div className="mt-5 space-y-2.5">
+                    <div className="skeleton h-3 w-4/5" />
+                    <div className="skeleton h-3 w-3/5" />
+                    <div className="skeleton h-3 w-2/3" />
+                  </div>
+                </div>
+              ))}
+              <span className="sr-only">Loading employee data...</span>
             </div>
           ) : error ? (
             <div className="flex flex-col items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 p-8 text-center text-rose-700">
               <AlertCircle className="h-6 w-6" />
-              <p className="text-sm font-medium">{error}</p>
-              <button type="button" onClick={fetchEmployees} className="btn btn-secondary btn-sm mt-2">
+              <p className="text-sm font-medium">{error instanceof Error ? error.message : 'Unable to load employee records.'}</p>
+              <button type="button" onClick={() => void fetchEmployees()} className="btn btn-secondary btn-sm mt-2">
                 <RefreshCw className="h-3.5 w-3.5" />
                 Retry
               </button>
@@ -586,18 +511,16 @@ export const EmployeeDashboard: React.FC = () => {
               <p className="text-sm text-(--text-muted)">Try adjusting your search or filters.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="stagger grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
               {filteredEmployees.map((emp) => (
                 <EmployeeCard
                   key={emp.id}
                   employee={{
                     ...emp,
-                    dept: emp.dept || emp.department || 'General',
-                    role: emp.role || emp.designation || 'Employee',
+                    dept: emp.department || 'General',
+                    role: emp.designation || 'Employee',
                   } as Employee}
-                  onToggleStatus={handleToggleStatus}
-                  onDelete={handleDeleteEmployee}
-                  onEdit={handleEditCard}
+                  showActions={false}
                 />
               ))}
             </div>
@@ -605,21 +528,6 @@ export const EmployeeDashboard: React.FC = () => {
         </section>
       </main>
 
-      {/* Add Employee Modal */}
-      <EmployeeModal
-        isOpen={addModalOpen}
-        onClose={() => setAddModalOpen(false)}
-        onSave={handleEmployeeAdded}
-        currentEmployee={null}
-      />
-
-      {/* Edit Employee Modal */}
-      <EditEmployeeModal
-        isOpen={isEditModalOpen}
-        employee={selectedEmployeeForEdit}
-        onClose={() => setIsEditModalOpen(false)}
-        onSuccess={handleEmployeeUpdated}
-      />
     </div>
   );
 };

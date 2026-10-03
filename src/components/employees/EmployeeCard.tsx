@@ -8,9 +8,10 @@ import { StatusBadge } from '@/components/common/StatusBadge';
 
 interface EmployeeCardProps {
   employee: Employee;
-  onToggleStatus: (id: string) => void;
-  onDelete: (id: string) => void; // Prop handler for removing an employee
-  onEdit: (id: string) => void; // Prop handler for editing an employee
+  onToggleStatus?: (id: string) => void;
+  onDelete?: (id: string) => void;
+  onEdit?: (id: string) => void;
+  showActions?: boolean;
 }
 
 const iconButton =
@@ -21,6 +22,7 @@ export const EmployeeCard: React.FC<EmployeeCardProps> = ({
   onToggleStatus,
   onDelete,
   onEdit,
+  showActions = true,
 }) => {
   const { name, id, dept, designation, email, status, avatarUrl } = employee;
   const isStatusActive = status === 'Active';
@@ -66,14 +68,14 @@ export const EmployeeCard: React.FC<EmployeeCardProps> = ({
           <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
         </Link>
 
-        <div className="flex items-center gap-1.5">
+        {showActions && onToggleStatus && onDelete && onEdit && <div className="flex items-center gap-1.5">
           {/* Status Toggle Button */}
           <button
             type="button"
             onClick={() => onToggleStatus(id)}
             title={isStatusActive ? 'Deactivate' : 'Activate'}
             aria-label={isStatusActive ? 'Deactivate' : 'Activate'}
-            className={`${iconButton} ${isStatusActive ? 'hover:border-amber-200 hover:bg-amber-50 hover:text-amber-600' : 'hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-600'}`}
+            className={`${iconButton} ${isStatusActive ? 'hover:border-amber-200 hover:bg-amber-50 hover:text-amber-600' : 'hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600'}`}
           >
             <Power className="h-4 w-4" />
           </button>
@@ -99,7 +101,7 @@ export const EmployeeCard: React.FC<EmployeeCardProps> = ({
           >
             <Trash2 className="h-4 w-4" />
           </button>
-        </div>
+        </div>}
       </div>
     </article>
   );
