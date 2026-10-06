@@ -5,6 +5,7 @@ import { getApiErrorMessage } from '@/api/axiosInstance';
 import { PageHeader } from '@/components/common/PageHeader';
 import { useToast } from '@/components/common/toast/toastContext';
 import { QueryState } from '@/components/common/QueryState';
+import { PaginationControls } from '@/components/common/PaginationControls';
 import { getStoredRoles, hasAnyRole } from '@/services/authService';
 import { approveLeave, applyForLeave, getLeaves, rejectLeave, type LeaveApplication, type LeaveRecord } from '@/services/hrmsDataService';
 
@@ -158,9 +159,17 @@ export const LeavesPage: React.FC = () => {
   const [applicationOpen, setApplicationOpen] = useState(false);
   const [leaveToReject, setLeaveToReject] = useState<LeaveRecord | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const { data = [], isLoading, isError, error, refetch } = useQuery({
-    queryKey: ['leaves', isManager],
-    queryFn: () => getLeaves(isManager),
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+  const {
+    data: leavePage = { content: [], totalElements: 0, totalPages: 0, number: 0, size: pageSize },
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ['leaves', isManager, page, pageSize, searchTerm],
+    queryFn: () => getLeaves(isManager, page, pageSize, searchTerm.trim()),
   });
   const applicationMutation = useMutation({
     mutationFn: applyForLeave,
@@ -174,7 +183,7 @@ export const LeavesPage: React.FC = () => {
     mutationFn: ({ id, decision, reason }: { id: number; decision: 'approve' | 'reject'; reason?: string }) =>
       decision === 'approve' ? approveLeave(id) : rejectLeave(id, reason),
     onSuccess: async (_leave, { id, decision }) => {
-      const employeeName = data.find((leave) => leave.id === id)?.employeeName;
+      const employeeName = leavePage.content.find((leave) => leave.id === id)?.employeeName;
       const whose = employeeName ? `${employeeName}'s` : 'The';
       await queryClient.invalidateQueries({ queryKey: ['leaves', true] });
       setLeaveToReject(null);
@@ -185,17 +194,7 @@ export const LeavesPage: React.FC = () => {
       }
     },
   });
-  const normalizedSearch = searchTerm.trim().toLowerCase();
-  const filteredLeaves = data.filter((leave) => [
-    leave.employeeName,
-    leave.leaveType,
-    leave.startDate,
-    leave.endDate,
-    leave.reason,
-    leave.status,
-    leave.rejectionReason,
-    leave.approvedByName,
-  ].some((value) => value?.toLowerCase().includes(normalizedSearch)));
+  const leaves = leavePage.content;
 
   return (
     <div>
@@ -219,7 +218,7 @@ export const LeavesPage: React.FC = () => {
         isLoading={isLoading}
         isError={isError}
         error={error}
-        isEmpty={!isLoading && !isError && data.length === 0}
+        isEmpty={!isLoading && !isError && leavePage.totalElements === 0 && !searchTerm.trim()}
         emptyTitle="No leave requests"
         emptyDescription="Leave requests will appear here once they have been submitted."
         onRetry={() => void refetch()}
@@ -233,11 +232,11 @@ export const LeavesPage: React.FC = () => {
                 aria-label="Search leave requests"
                 placeholder="Search employee, type, status, or reason"
                 value={searchTerm}
-                onChange={(event) => setSearchTerm(event.target.value)}
+                onChange={(event) => { setSearchTerm(event.target.value); setPage(0); }}
                 className="field pl-10 pr-10"
               />
               {searchTerm && (
-                <button type="button" onClick={() => setSearchTerm('')} aria-label="Clear leave search" className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-(--text-muted) hover:bg-(--bg-subtle) hover:text-(--text-main)">
+                <button type="button" onClick={() => { setSearchTerm(''); setPage(0); }} aria-label="Clear leave search" className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-(--text-muted) hover:bg-(--bg-subtle) hover:text-(--text-main)">
                   <X className="h-4 w-4" />
                 </button>
               )}
@@ -256,13 +255,13 @@ export const LeavesPage: React.FC = () => {
               </tr>
             </thead>
             <tbody className="stagger-rows divide-y divide-(--border-color)">
-              {filteredLeaves.length === 0 ? (
+              {leaves.length === 0 ? (
                 <tr>
                   <td colSpan={isManager ? 7 : 4} className="px-5 py-12 text-center text-sm text-(--text-muted)">
                     No leave requests match “{searchTerm}”.
                   </td>
                 </tr>
-              ) : filteredLeaves.map((leave) => (
+              ) : leaves.map((leave) => (
                 <tr key={leave.id} className="table-row">
                   {isManager && <td className="whitespace-nowrap px-5 py-4 font-medium text-(--text-main)">{leave.employeeName}</td>}
                   <td className="px-5 py-4 text-(--text-main)">{leave.leaveType}</td>
@@ -302,6 +301,14 @@ export const LeavesPage: React.FC = () => {
               ))}
             </tbody>
           </table>
+          <PaginationControls
+            page={page}
+            pageSize={pageSize}
+            totalElements={leavePage.totalElements}
+            totalPages={leavePage.totalPages}
+            onPageChange={setPage}
+            onPageSizeChange={(size) => { setPageSize(size); setPage(0); }}
+          />
         </div>
       </QueryState>
 

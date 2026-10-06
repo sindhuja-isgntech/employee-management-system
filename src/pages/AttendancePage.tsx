@@ -5,6 +5,7 @@ import { getApiErrorMessage } from '@/api/axiosInstance';
 import { PageHeader } from '@/components/common/PageHeader';
 import { useToast } from '@/components/common/toast/toastContext';
 import { QueryState } from '@/components/common/QueryState';
+import { PaginationControls } from '@/components/common/PaginationControls';
 import { getStoredRoles, hasAnyRole } from '@/services/authService';
 import { checkInToAttendance, checkOutFromAttendance, getAttendance } from '@/services/hrmsDataService';
 
@@ -23,15 +24,28 @@ export const AttendancePage: React.FC = () => {
   const queryClient = useQueryClient();
   const toast = useToast();
   const [date, setDate] = useState('');
-  const { data = [], isLoading, isError, error, refetch } = useQuery({
-    queryKey: ['attendance', isManager, date],
-    queryFn: () => getAttendance(isManager, date || undefined),
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+  const {
+    data: attendancePage = { content: [], totalElements: 0, totalPages: 0, number: 0, size: pageSize },
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ['attendance', isManager, date, page, pageSize],
+    queryFn: () => getAttendance(isManager, date || undefined, page, pageSize),
+  });
+  const { data: latestAttendancePage } = useQuery({
+    queryKey: ['attendance', 'latest-for-actions'],
+    queryFn: () => getAttendance(false, undefined, 0, 10),
+    enabled: isEmployee && page > 0,
   });
   const attendanceMutation = useMutation({
     mutationFn: (action: 'check-in' | 'check-out') =>
       action === 'check-in' ? checkInToAttendance() : checkOutFromAttendance(),
     onSuccess: async (record, action) => {
-      await queryClient.invalidateQueries({ queryKey: ['attendance', false] });
+      await queryClient.invalidateQueries({ queryKey: ['attendance'] });
       if (action === 'check-in') {
         const time = record?.checkIn ? ` at ${formatDateTime(record.checkIn)}` : '';
         toast.success('Checked in successfully', `You checked in${time}. Have a great day!`);
@@ -45,7 +59,9 @@ export const AttendancePage: React.FC = () => {
 
   const now = new Date();
   const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-  const todayRecord = data.find((record) => record.attendanceDate === today);
+  const records = attendancePage.content;
+  const actionRecords = page === 0 ? records : latestAttendancePage?.content ?? [];
+  const todayRecord = actionRecords.find((record) => record.attendanceDate === today);
   const canCheckIn = isEmployee && !todayRecord;
   const canCheckOut = isEmployee && Boolean(todayRecord?.checkIn) && !todayRecord?.checkOut;
 
@@ -60,7 +76,7 @@ export const AttendancePage: React.FC = () => {
             <input
               type="date"
               value={date}
-              onChange={(event) => setDate(event.target.value)}
+              onChange={(event) => { setDate(event.target.value); setPage(0); }}
               className="h-10 rounded-lg border border-(--border-color) bg-white px-3 text-sm text-(--text-main) focus:border-(--primary) focus:outline-none focus:ring-3 focus:ring-blue-600/15"
             />
           </label>
@@ -96,7 +112,7 @@ export const AttendancePage: React.FC = () => {
         isLoading={isLoading}
         isError={isError}
         error={error}
-        isEmpty={!isLoading && !isError && data.length === 0}
+        isEmpty={!isLoading && !isError && attendancePage.totalElements === 0}
         emptyTitle="No attendance records"
         emptyDescription={date ? 'There are no records for this date.' : 'Attendance records will appear here once they are available.'}
         onRetry={() => void refetch()}
@@ -114,7 +130,7 @@ export const AttendancePage: React.FC = () => {
               </tr>
             </thead>
             <tbody className="stagger-rows divide-y divide-(--border-color)">
-              {data.map((record) => (
+              {records.map((record) => (
                 <tr key={record.id} className="table-row">
                   <td className="whitespace-nowrap px-5 py-4 font-medium text-(--text-main)">
                     {new Date(`${record.attendanceDate}T00:00:00`).toLocaleDateString()}
@@ -138,6 +154,14 @@ export const AttendancePage: React.FC = () => {
               ))}
             </tbody>
           </table>
+          <PaginationControls
+            page={page}
+            pageSize={pageSize}
+            totalElements={attendancePage.totalElements}
+            totalPages={attendancePage.totalPages}
+            onPageChange={setPage}
+            onPageSizeChange={(size) => { setPageSize(size); setPage(0); }}
+          />
         </div>
       </QueryState>
     </div>

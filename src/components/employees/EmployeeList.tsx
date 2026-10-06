@@ -119,6 +119,7 @@ import { PageHeader } from '@/components/common/PageHeader';
 import { useToast } from '@/components/common/toast/toastContext';
 import { InitialsAvatar } from '@/components/common/InitialsAvatar';
 import { ConfirmDeleteDialog } from '@/components/common/ConfirmDeleteDialog';
+import { PaginationControls } from '@/components/common/PaginationControls';
 import { EmployeeFormModal } from '@/components/employees/EmployeeFormModal';
 import { CreateLoginModal } from '@/components/employees/CreateLoginModal';
 import { getDepartments } from '@/services/hrmsDataService';
@@ -129,17 +130,25 @@ export const EmployeeList: React.FC = () => {
   const [loginFormOpen, setLoginFormOpen] = useState(false);
   const [employeeToEdit, setEmployeeToEdit] = useState<ApiEmployee | null>(null);
   const [employeeToDelete, setEmployeeToDelete] = useState<ApiEmployee | null>(null);
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
   const queryClient = useQueryClient();
   const toast = useToast();
   const canCreateLogins = hasAnyRole(getStoredRoles(), ['ADMIN']);
   const {
-    data: employees = [],
+    data: employeePage = { content: [], totalElements: 0, totalPages: 0, number: 0, size: pageSize },
     isLoading,
     error,
     refetch,
   } = useQuery({
-    queryKey: ['employees'],
+    queryKey: ['employees', page, pageSize],
+    queryFn: () => employeeApi.getEmployeesPage(page, pageSize),
+  });
+  const employees = employeePage.content;
+  const employeesPickerQuery = useQuery({
+    queryKey: ['employees-picker'],
     queryFn: employeeApi.getEmployees,
+    enabled: loginFormOpen,
   });
   const departmentsQuery = useQuery({
     queryKey: ['departments'],
@@ -150,12 +159,14 @@ export const EmployeeList: React.FC = () => {
       id ? employeeApi.updateEmployee(id, payload) : employeeApi.createEmployee(payload),
     onSuccess: async (_saved, { id, payload }) => {
       await queryClient.invalidateQueries({ queryKey: ['employees'] });
+      await queryClient.invalidateQueries({ queryKey: ['employees-picker'] });
       setFormOpen(false);
       setEmployeeToEdit(null);
       const fullName = `${payload.firstName} ${payload.lastName}`.trim();
       if (id) {
         toast.success('Employee updated', `${fullName}'s details were saved successfully.`);
       } else {
+        setPage(0);
         toast.success('Employee created', `${fullName} was added to the employee directory.`);
       }
     },
@@ -165,6 +176,9 @@ export const EmployeeList: React.FC = () => {
     onSuccess: async () => {
       const deletedName = employeeToDelete?.name;
       await queryClient.invalidateQueries({ queryKey: ['employees'] });
+      await queryClient.invalidateQueries({ queryKey: ['employees-picker'] });
+      const remainingPages = Math.ceil(Math.max(0, employeePage.totalElements - 1) / pageSize);
+      if (page >= remainingPages) setPage(Math.max(remainingPages - 1, 0));
       setEmployeeToDelete(null);
       toast.success('Employee deleted', deletedName ? `${deletedName}'s record was removed.` : 'The employee record was removed.');
     },
@@ -204,7 +218,7 @@ export const EmployeeList: React.FC = () => {
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             <span className="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-(--primary-soft) px-3 py-1.5 text-sm font-semibold text-(--primary)">
               <Users className="h-4 w-4" />
-              {employees.length} employees
+              {employeePage.totalElements} employees
             </span>
             {canCreateLogins && (
               <button type="button" onClick={() => { loginMutation.reset(); setLoginFormOpen(true); }} className="btn btn-secondary">
@@ -303,6 +317,14 @@ export const EmployeeList: React.FC = () => {
             ))}
           </tbody>
         </table>
+        <PaginationControls
+          page={page}
+          pageSize={pageSize}
+          totalElements={employeePage.totalElements}
+          totalPages={employeePage.totalPages}
+          onPageChange={setPage}
+          onPageSizeChange={(size) => { setPageSize(size); setPage(0); }}
+        />
       </div>
 
       {formOpen && (
@@ -329,7 +351,8 @@ export const EmployeeList: React.FC = () => {
 
       {loginFormOpen && canCreateLogins && (
         <CreateLoginModal
-          employees={employees}
+          employees={employeesPickerQuery.data ?? []}
+          employeesLoading={employeesPickerQuery.isLoading}
           isPending={loginMutation.isPending}
           error={loginMutation.error}
           onClose={() => setLoginFormOpen(false)}

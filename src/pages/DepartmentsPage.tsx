@@ -5,12 +5,14 @@ import { getApiErrorMessage } from '@/api/axiosInstance';
 import { PageHeader } from '@/components/common/PageHeader';
 import { useToast } from '@/components/common/toast/toastContext';
 import { QueryState } from '@/components/common/QueryState';
+import { PaginationControls } from '@/components/common/PaginationControls';
 import { ConfirmDeleteDialog } from '@/components/common/ConfirmDeleteDialog';
 import { hasAnyRole, getStoredRoles } from '@/services/authService';
 import {
   createDepartment,
   deleteDepartment,
-  getDepartments,
+  getDepartmentsPage,
+  getDepartmentSummary,
   updateDepartment,
   type DepartmentRecord,
   type DepartmentRequest,
@@ -100,19 +102,33 @@ export const DepartmentsPage: React.FC = () => {
   const [departmentToDelete, setDepartmentToDelete] = useState<DepartmentRecord | null>(null);
   const [departmentSearch, setDepartmentSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | DepartmentRecord['status']>('ALL');
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
   const canManageDepartments = hasAnyRole(getStoredRoles(), ['ADMIN', 'HR']);
-  const { data = [], isLoading, isError, error, refetch } = useQuery({
-    queryKey: ['departments'],
-    queryFn: getDepartments,
+  const {
+    data: departmentPage = { content: [], totalElements: 0, totalPages: 0, number: 0, size: pageSize },
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ['departments', page, pageSize, departmentSearch, statusFilter],
+    queryFn: () => getDepartmentsPage(page, pageSize, departmentSearch, statusFilter === 'ALL' ? undefined : statusFilter),
+  });
+  const { data: departmentSummary } = useQuery({
+    queryKey: ['department-summary'],
+    queryFn: getDepartmentSummary,
   });
   const saveMutation = useMutation({
     mutationFn: ({ id, department }: { id: number | null; department: DepartmentRequest }) =>
       id === null ? createDepartment(department) : updateDepartment(id, department),
     onSuccess: async (_saved, { id, department }) => {
       await queryClient.invalidateQueries({ queryKey: ['departments'] });
+      await queryClient.invalidateQueries({ queryKey: ['department-summary'] });
       setFormOpen(false);
       setDepartmentToEdit(null);
       if (id === null) {
+        setPage(0);
         toast.success('Department added', `"${department.name}" was added successfully.`);
       } else {
         toast.success('Department updated', `"${department.name}" was saved successfully.`);
@@ -124,16 +140,14 @@ export const DepartmentsPage: React.FC = () => {
     onSuccess: async () => {
       const deletedName = departmentToDelete?.name;
       await queryClient.invalidateQueries({ queryKey: ['departments'] });
+      await queryClient.invalidateQueries({ queryKey: ['department-summary'] });
+      const remainingPages = Math.ceil(Math.max(0, departmentPage.totalElements - 1) / pageSize);
+      if (page >= remainingPages) setPage(Math.max(remainingPages - 1, 0));
       setDepartmentToDelete(null);
       toast.success('Department deleted', deletedName ? `"${deletedName}" was removed.` : 'The department was removed.');
     },
   });
-  const activeCount = data.filter((department) => department.status === 'ACTIVE').length;
-  const normalizedDepartmentSearch = departmentSearch.trim().toLowerCase();
-  const filteredDepartments = data.filter((department) =>
-    department.name.toLowerCase().includes(normalizedDepartmentSearch) &&
-    (statusFilter === 'ALL' || department.status === statusFilter)
-  );
+  const departments = departmentPage.content;
   const mutationError = deleteMutation.error;
 
   const openCreateForm = () => {
@@ -166,9 +180,9 @@ export const DepartmentsPage: React.FC = () => {
       />
       <section className="stagger mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3" aria-label="Department summary">
         {[
-          { label: 'Total departments', value: data.length, icon: Building2, tone: 'bg-(--primary-soft) text-(--primary)' },
-          { label: 'Active', value: activeCount, icon: CheckCircle2, tone: 'bg-blue-50 text-blue-600' },
-          { label: 'Inactive', value: data.length - activeCount, icon: CircleSlash, tone: 'bg-slate-100 text-slate-500' },
+          { label: 'Total departments', value: departmentSummary?.total ?? 0, icon: Building2, tone: 'bg-(--primary-soft) text-(--primary)' },
+          { label: 'Active', value: departmentSummary?.active ?? 0, icon: CheckCircle2, tone: 'bg-blue-50 text-blue-600' },
+          { label: 'Inactive', value: departmentSummary?.inactive ?? 0, icon: CircleSlash, tone: 'bg-slate-100 text-slate-500' },
         ].map(({ label, value, icon: Icon, tone }) => (
           <div key={label} className="card card-hover flex items-center gap-4 p-5">
             <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${tone}`}>
@@ -193,7 +207,7 @@ export const DepartmentsPage: React.FC = () => {
         isLoading={isLoading}
         isError={isError}
         error={error}
-        isEmpty={!isLoading && !isError && data.length === 0}
+        isEmpty={!isLoading && !isError && departmentPage.totalElements === 0 && !departmentSearch.trim() && statusFilter === 'ALL'}
         emptyTitle="No departments yet"
         emptyDescription="Departments added to the organization will appear here."
         onRetry={() => void refetch()}
@@ -207,14 +221,14 @@ export const DepartmentsPage: React.FC = () => {
                 aria-label="Search department names"
                 placeholder="Search department name"
                 value={departmentSearch}
-                onChange={(event) => setDepartmentSearch(event.target.value)}
+                onChange={(event) => { setDepartmentSearch(event.target.value); setPage(0); }}
                 className="field pl-10"
               />
             </div>
             <select
               aria-label="Filter departments by status"
               value={statusFilter}
-              onChange={(event) => setStatusFilter(event.target.value as typeof statusFilter)}
+              onChange={(event) => { setStatusFilter(event.target.value as typeof statusFilter); setPage(0); }}
               className="field w-full sm:w-44"
             >
               <option value="ALL">All statuses</option>
@@ -233,13 +247,13 @@ export const DepartmentsPage: React.FC = () => {
               </tr>
             </thead>
             <tbody className="stagger-rows divide-y divide-(--border-color)">
-              {filteredDepartments.length === 0 ? (
+              {departments.length === 0 ? (
                 <tr>
                   <td colSpan={canManageDepartments ? 5 : 4} className="px-5 py-12 text-center text-sm text-(--text-muted)">
                     No departments match these filters.
                   </td>
                 </tr>
-              ) : filteredDepartments.map((department) => (
+              ) : departments.map((department) => (
                 <tr key={department.id} className="table-row">
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-3">
@@ -276,6 +290,14 @@ export const DepartmentsPage: React.FC = () => {
               ))}
             </tbody>
           </table>
+          <PaginationControls
+            page={page}
+            pageSize={pageSize}
+            totalElements={departmentPage.totalElements}
+            totalPages={departmentPage.totalPages}
+            onPageChange={setPage}
+            onPageSizeChange={(size) => { setPageSize(size); setPage(0); }}
+          />
         </div>
       </QueryState>
 

@@ -1,4 +1,5 @@
 import API from '@/api/axiosInstance';
+import type { PaginatedResponse } from '@/types';
 
 export interface DepartmentRecord {
   id: number;
@@ -10,6 +11,12 @@ export interface DepartmentRecord {
 }
 
 export type DepartmentRequest = Pick<DepartmentRecord, 'name' | 'description' | 'status'>;
+
+export interface DepartmentSummary {
+  total: number;
+  active: number;
+  inactive: number;
+}
 
 export interface AttendanceRecord {
   id: number;
@@ -39,7 +46,26 @@ export interface LeaveRecord {
 export type LeaveApplication = Pick<LeaveRecord, 'leaveType' | 'startDate' | 'endDate' | 'reason'>;
 
 export const getDepartments = async (): Promise<DepartmentRecord[]> => {
-  const response = await API.get<DepartmentRecord[]>('/api/departments');
+  const response = await API.get<PaginatedResponse<DepartmentRecord>>('/api/departments', {
+    params: { page: 0, size: 1000 },
+  });
+  return response.data.content;
+};
+
+export const getDepartmentsPage = async (
+  page: number,
+  size: number,
+  search: string,
+  status?: DepartmentRecord['status'],
+): Promise<PaginatedResponse<DepartmentRecord>> => {
+  const response = await API.get<PaginatedResponse<DepartmentRecord>>('/api/departments', {
+    params: { page, size, search, status },
+  });
+  return response.data;
+};
+
+export const getDepartmentSummary = async (): Promise<DepartmentSummary> => {
+  const response = await API.get<DepartmentSummary>('/api/departments/summary');
   return response.data;
 };
 
@@ -63,10 +89,12 @@ export const deleteDepartment = async (id: number): Promise<void> => {
 export const getAttendance = async (
   isManager: boolean,
   date?: string,
-): Promise<AttendanceRecord[]> => {
-  const response = await API.get<AttendanceRecord[]>(
+  page = 0,
+  size = 10,
+): Promise<PaginatedResponse<AttendanceRecord>> => {
+  const response = await API.get<PaginatedResponse<AttendanceRecord>>(
     isManager ? '/attendance' : '/attendance/my',
-    { params: isManager && date ? { date } : undefined },
+    { params: { ...(isManager && date ? { date } : {}), page, size } },
   );
   return response.data;
 };
@@ -81,8 +109,15 @@ export const checkOutFromAttendance = async (): Promise<AttendanceRecord> => {
   return response.data;
 };
 
-export const getLeaves = async (isManager: boolean): Promise<LeaveRecord[]> => {
-  const response = await API.get<LeaveRecord[]>(isManager ? '/leaves' : '/leaves/my');
+export const getLeaves = async (
+  isManager: boolean,
+  page = 0,
+  size = 10,
+  search = '',
+): Promise<PaginatedResponse<LeaveRecord>> => {
+  const response = await API.get<PaginatedResponse<LeaveRecord>>(isManager ? '/leaves' : '/leaves/my', {
+    params: { page, size, search },
+  });
   return response.data;
 };
 

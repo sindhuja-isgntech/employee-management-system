@@ -6,6 +6,7 @@ import type { CreateLoginRequest } from '@/services/authService';
 
 interface CreateLoginModalProps {
   employees: ApiEmployee[];
+  employeesLoading: boolean;
   isPending: boolean;
   error: unknown;
   onClose: () => void;
@@ -14,6 +15,7 @@ interface CreateLoginModalProps {
 
 export const CreateLoginModal: React.FC<CreateLoginModalProps> = ({
   employees,
+  employeesLoading,
   isPending,
   error,
   onClose,
@@ -68,13 +70,13 @@ export const CreateLoginModal: React.FC<CreateLoginModalProps> = ({
           {accountType === 'EMPLOYEE' ? (
             <div className="space-y-1.5">
               <label htmlFor="login-employee" className="text-sm font-medium text-(--text-main)">Employee *</label>
-              <select id="login-employee" required value={employeeId} onChange={(event) => setEmployeeId(event.target.value)} disabled={isPending || employees.length === 0} className="field">
+              <select id="login-employee" required value={employeeId} onChange={(event) => setEmployeeId(event.target.value)} disabled={isPending || employeesLoading || employees.length === 0} className="field">
                 <option value="" disabled>Select an employee</option>
                 {employees.map((employee) => (
                   <option key={employee.id} value={employee.id}>{employee.name} ({employee.email})</option>
                 ))}
               </select>
-              {employees.length === 0 && <p className="text-xs text-rose-700">Add an employee record before creating its login.</p>}
+              {employeesLoading ? <p className="text-xs text-(--text-muted)">Loading employees...</p> : employees.length === 0 && <p className="text-xs text-rose-700">Add an employee record before creating its login.</p>}
               {selectedEmployee && <p className="text-xs text-(--text-muted)">The login email will match this employee record.</p>}
             </div>
           ) : (

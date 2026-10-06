@@ -1,6 +1,7 @@
 // src/api/employeeApi.ts
 import axiosInstance from './axiosInstance';
 import { ENDPOINTS } from './endpoints';
+import type { PaginatedResponse } from '../types';
 
 export interface ApiEmployee {
   id: string;
@@ -38,10 +39,6 @@ interface EmployeeResponse extends Omit<EmployeeRequest, 'status' | 'phone'> {
   status: string;
 }
 
-interface PaginatedEmployees {
-  content: EmployeeResponse[];
-}
-
 const toApiEmployee = (employee: EmployeeResponse): ApiEmployee => ({
   id: String(employee.id),
   employeeCode: employee.employeeCode,
@@ -59,12 +56,16 @@ const toApiEmployee = (employee: EmployeeResponse): ApiEmployee => ({
 });
 
 export const employeeApi = {
-  // Fetch all employees
-  getEmployees: async (): Promise<ApiEmployee[]> => {
-    const response = await axiosInstance.get<PaginatedEmployees>(ENDPOINTS.EMPLOYEES, {
-      params: { page: 0, size: 100 },
+  getEmployeesPage: async (page: number, size: number): Promise<PaginatedResponse<ApiEmployee>> => {
+    const response = await axiosInstance.get<PaginatedResponse<EmployeeResponse>>(ENDPOINTS.EMPLOYEES, {
+      params: { page, size, sortBy: 'id', sortDir: 'desc' },
     });
-    return response.data.content.map(toApiEmployee);
+    return { ...response.data, content: response.data.content.map(toApiEmployee) };
+  },
+
+  getEmployees: async (): Promise<ApiEmployee[]> => {
+    const response = await employeeApi.getEmployeesPage(0, 1000);
+    return response.content;
   },
 
   // Fetch single employee by ID
